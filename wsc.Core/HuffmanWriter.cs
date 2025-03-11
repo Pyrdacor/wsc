@@ -1,11 +1,9 @@
-﻿using System.Linq;
-
-namespace wsc.Core;
+﻿namespace wsc.Core;
 
 public class HuffmanWriter(Dictionary<Word, HuffmanCode> huffmanCodes, BitWriter writer)
 {
     // Usual code lengths are: 2, 5, 6, 7, 8, 9, 10, 11 and 12.
-    // 1 and 17 are rare, 12 is most common. 0 is used if the index is not used.
+    // 1 and 17+ are rare, 12 is most common. 0 is used if the index is not used.
     // The codes are static like this:
     //
     // 0: 3 bits
@@ -19,14 +17,19 @@ public class HuffmanWriter(Dictionary<Word, HuffmanCode> huffmanCodes, BitWriter
     // 8: 4 bits
     // 9: 4 bits
     // 10: 4 bits
-    // 11: 3 bits
+    // 11: 4 bits
     // 12: 3 bits
     // 13: 3 bits
-    // 14: 6 bits
+    // 14: 5 bits
     // 15: 6 bits
     // 16: 6 bits
-    // 17: 7 bits
-    internal static readonly Uint[] LengthCodeLengths = [3, 7, 5, 5, 5, 5, 4, 4, 4, 4, 4, 3, 3, 3, 6, 6, 6, 7];
+    // 17: 6 bits
+    // 18: 7 bits
+    // 19: 7 bits
+    // 20: 7 bits
+    // 21: 7 bits
+    // 22: 7 bits
+    internal static readonly Uint[] LengthCodeLengths = [3, 7, 5, 5, 5, 5, 4, 4, 4, 4, 4, 4, 3, 3, 5, 6, 6, 6, 7, 7, 7, 7, 7];
 
     public void WriteIndex(Word index)
     {

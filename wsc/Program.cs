@@ -8,23 +8,23 @@ public static class Program
 {
     public static void Main()
     {
-#if false
-        var data = File.ReadAllBytes(@"D:\Projects\Ambermoon Advanced\releases\english\ambermoon_advanced_english_1.31_extracted\Ambermoon");
+#if true
+        var data = File.ReadAllBytes(@"D:\Projects\Ambermoon Advanced\releases\english\ambermoon_advanced_english_1.31_extracted\image.bmp");
 
-        var compressedData = Compress(data);
+        var compressedData = Compress(data.Length % 2 == 0 ? data : [ ..data, 0 ]);
 
         if (compressedData.Length < data.Length)
         {
             Console.WriteLine($"Compressed from {data.Length} to {compressedData.Length}");
 
-            File.WriteAllBytes(@"D:\Projects\Ambermoon Advanced\releases\english\ambermoon_advanced_english_1.31_extracted\Ambermoon.cmp", compressedData);
+            File.WriteAllBytes(@"D:\Projects\Ambermoon Advanced\releases\english\ambermoon_advanced_english_1.31_extracted\image.cmp", compressedData);
         }
 #else
-        var data = File.ReadAllBytes(@"D:\Projects\Ambermoon Advanced\releases\english\ambermoon_advanced_english_1.31_extracted\Ambermoon.cmp");
+        var data = File.ReadAllBytes(@"D:\Projects\Ambermoon Advanced\releases\english\ambermoon_advanced_english_1.31_extracted\image.cmp");
 
         var unc = Decompress(data);
 
-        File.WriteAllBytes(@"D:\Projects\Ambermoon Advanced\releases\english\ambermoon_advanced_english_1.31_extracted\Ambermoon.raw", unc);
+        File.WriteAllBytes(@"D:\Projects\Ambermoon Advanced\releases\english\ambermoon_advanced_english_1.31_extracted\image.raw", unc);
 #endif
     }
 
@@ -63,6 +63,9 @@ public static class Program
 
                 if (readSymbols)
                 {
+                    if (reader.Position >= reader.Size - 1)
+                        goto End;
+
                     var symbol = (Word)reader.ReadBits(16);
                     PutWord(symbol);
 
@@ -70,8 +73,18 @@ public static class Program
                 }
                 else // index
                 {
-                    var index = huffmanReader.ReadIndex();
-                    PutWord(symbolsByIndexes[index]);
+                    try
+                    {
+                        var index = huffmanReader.ReadIndex();
+                        PutWord(symbolsByIndexes[index]);
+                    }
+                    catch (Exception)
+                    {
+                        if (reader.Position >= reader.Size - 1)
+                            goto End;
+
+                        throw;
+                    }
                 }
             }
 
@@ -97,6 +110,7 @@ public static class Program
             }
         }
 
+    End:
         return [.. output];
     }
 
@@ -187,7 +201,7 @@ public static class Program
         if (canonicalCodes.Min(code => code.Value.Length) >= 16) // not worth compressing
             return originalData;
 
-        if (canonicalCodes.Max(code => code.Value.Length) > 17) // can't encode the tree
+        if (canonicalCodes.Max(code => code.Value.Length) > 22) // can't encode the tree
             return originalData;
 
         var huffmanWriter = new HuffmanWriter(canonicalCodes, writer);
