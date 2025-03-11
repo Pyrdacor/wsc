@@ -196,7 +196,6 @@ public static class Program
         bool writeSymbols = true;
         Uint nextHeaderCount = Math.Min(256, remainingCount);
         var nextCounts = new Uint[5];
-        Uint removedCount = 0;
 
         huffmanWriter.WriteTree();
 
@@ -227,16 +226,18 @@ public static class Program
                     if (nextCounts[0] != 0)
                     {
                         remainingCount = PopNextCount();
-                        return;
+
+                        if (nextHeaderCount != 0)
+                            return;
                     }
                     else if (counts.Count == 0)
                     {
                         return;
                     }
-                    
-                    remainingCount = counts.Dequeue();
-                    remainingCount -= removedCount;
-                    removedCount = 0;
+                    else
+                    {
+                        remainingCount = counts.Dequeue();
+                    }
                 }
 
                 if (remainingCount < 6 && nextCounts[4] == 0)
@@ -276,12 +277,7 @@ public static class Program
                     if (bitCount > remainingCount)
                     {
                         if (bitCount < 6)
-                        {
-                            if (i == 5 && counts.Count != 0)
-                                removedCount = 6 - bitCount;
-
                             bitCount = 6;
-                        }
 
                         bool set = !writeSymbols;
                         Uint currentCount = remainingCount;
@@ -312,13 +308,19 @@ public static class Program
                 }
                 else if (writeSymbols)
                 {
-                    nextHeaderCount = Math.Min(128, remainingCount);
-                    writer.WriteBits(Math.Min(128, remainingCount) - 1, 8);
+                    if (nextHeaderCount == 0)
+                    {
+                        nextHeaderCount = Math.Min(128, remainingCount);
+                        writer.WriteBits(Math.Min(128, remainingCount) - 1, 8);
+                    }
                 }
                 else // indexes
                 {
-                    nextHeaderCount = Math.Min(64, remainingCount);
-                    writer.WriteBits(Math.Min(64, remainingCount) - 1 + 0x80, 8);
+                    if (nextHeaderCount == 0)
+                    {
+                        nextHeaderCount = Math.Min(64, remainingCount);
+                        writer.WriteBits(Math.Min(64, remainingCount) - 1 + 0x80, 8);
+                    }
                 }
             }
         }
