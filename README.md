@@ -22,7 +22,7 @@ The tricky part is to store the tree, as it might encode way more than 256 symbo
 The Huffman tree is first based on a simple frequency table of all word indexes. Canonical huffman codes are then
 generated from this table.
 
-Only the lengths of the indexex are stored. First the total amount of indexes is stored as 16 bit value. This includes
+Only the length of the indexes are stored. First the total amount of indexes is stored as a 16 bit value. This includes
 all indexes up to the highest which is actually used (= repeated word).
 
 Then the lengths of each index is stored in a bitstream. The lengths are stored in a special way to save space.
@@ -72,7 +72,7 @@ specify the size of the compressed data minus 1. So it is possible to specify le
 
 ### Data format
 
-Note that the tree data always starts on a full byte boundary!
+Note that the whole tree data section always starts on a full byte boundary!
 
 #### RLE encoded data
 
