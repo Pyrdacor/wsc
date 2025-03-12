@@ -101,8 +101,8 @@ After decompression it has the same format as non-RLE uncompressed tree data (se
 
 n is an arbitrary size but in total it should match the amount of bits needed to encode all the given indexes.
 
-For every given index (0 up to the umber of indexes minus 1) a length is stored with the mentioned bit encoding.
-From those length the main Huffman tree for the indexes can be reconstructed.
+For every given index (0 up to the number of indexes minus 1) a length is stored with the mentioned bit encoding.
+From those lengths the main Huffman tree for the indexes can be reconstructed.
 
 Note that after the tree data, it is ensured that following data will start at a full byte boundary!
 
@@ -112,7 +112,7 @@ Note that after the tree data, it is ensured that following data will start at a
 After the tree, the actual compressed data follows. It is a sequence of 8-bit headers, 16-bit symbols and encoded indexes.
 
 The data starts with an 8-bit header. This header directly specifies how many symbols follow. The value must be increased by
-1, as 0 symbols at the beginning would not make sense.
+1, as 0 symbols at the beginning would not make sense. So an amount of 1 to 256 symbols can be given here.
 
 Then this amount of symbols is read as 16-bit values. Note that the values are big endian as we effectively read from a bitstream.
 
