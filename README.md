@@ -72,7 +72,7 @@ specify the size of the compressed data minus 1. So it is possible to specify le
 
 ### Data format
 
-Note that the whole tree data section always starts on a full byte boundary!
+Note that the whole tree data section always starts at a full byte boundary!
 
 #### RLE encoded data
 
@@ -82,7 +82,7 @@ Note that the whole tree data section always starts on a full byte boundary!
 | 0x02   | 2      | 0x8000 + size of compressed data - 1 |
 | 0x04   | n      | RLE-encoded tree data                |
 
-n is the size of the compressed data. For example of the header is 0x8007, the compressed data size is 0x8007 - 0x8000 + 1 = 8 bytes.
+n is the size of the compressed data. For example if the header is 0x8007, the compressed data size is 0x8007 - 0x8000 + 1 = 8 bytes.
 
 To decompress the tree data just read byte by byte. If the byte is non-zero just write it to the output.
 If it is zero read the next byte, add 1 and write that many zeros to the output.
