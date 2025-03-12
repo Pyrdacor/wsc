@@ -7,7 +7,7 @@ Those indexes are then compressed by a dynamic canonical Huffman tree which allo
 
 The tree is stored with the compressed data and is itself encoded in a special way.
 
-The compression is quite fast in contrast to algorithms like LZ77 as it has not do search for reoccuring patterns.
+The compression is quite fast in contrast to algorithms like LZ77 as it has not to search for reoccuring patterns.
 You could say that the word indexes encode a byte sequence match of length 2. But it does not need any offset or
 length information. The index itself is enough and has always the same size.
 
@@ -29,31 +29,31 @@ Then the lengths of each index is stored in a bitstream. The lengths are stored 
 
 There is a static Huffman table for the lengths of the index lengths.
 
-Length | Bit representation
--------|-------------------
-     0 | 000
-    12 | 001
-    13 | 010
-     6 | 0110
-     7 | 0111
-     8 | 1000
-     9 | 1001
-    10 | 1010
-    11 | 1011
-     2 | 11000
-     3 | 11001
-     4 | 11010
-     5 | 11011
-    14 | 11100
-    15 | 111010
-    16 | 111011
-    17 | 111100
-     1 | 1111010
-    18 | 1111011
-    19 | 1111100
-    20 | 1111101
-    21 | 1111110
-    22 | 1111111
+| Length | Bit representation |
+|--------|--------------------|
+|     0 | 000                 |
+|    12 | 001                 |
+|    13 | 010                 |
+|     6 | 0110                |
+|     7 | 0111                |
+|     8 | 1000                |
+|     9 | 1001                |
+|    10 | 1010                |
+|    11 | 1011                |
+|     2 | 11000               |
+|     3 | 11001               |
+|     4 | 11010               |
+|     5 | 11011               |
+|    14 | 11100               |
+|    15 | 111010              |
+|    16 | 111011              |
+|    17 | 111100              |
+|     1 | 1111010             |
+|    18 | 1111011             |
+|    19 | 1111100             |
+|    20 | 1111101             |
+|    21 | 1111110             |
+|    22 | 1111111             |
 
 From those information a canonical huffman tree is generated in both the encoder and decoder.
 
@@ -76,11 +76,11 @@ Note that the tree data always starts on a full byte boundary!
 
 #### RLE encoded data
 
-Offset | Length | Description
------------------------------------
-0x00   | 2      | Number of indexes
-0x02   | 2      | 0x8000 + size of compressed data - 1
-0x04   | n      | RLE-encoded tree data
+| Offset | Length | Description                          |
+|--------|--------|--------------------------------------|
+| 0x00   | 2      | Number of indexes                    |
+| 0x02   | 2      | 0x8000 + size of compressed data - 1 |
+| 0x04   | n      | RLE-encoded tree data                |
 
 n is the size of the compressed data. For example of the header is 0x8007, the compressed data size is 0x8007 - 0x8000 + 1 = 8 bytes.
 
@@ -93,11 +93,11 @@ After decompression it has the same format as non-RLE uncompressed tree data (se
 
 #### Non-RLE data
 
-Offset | Length | Description
------------------------------------
-0x00   | 2      | Number of indexes
-0x02   | 1      | 0x00
-0x03   | n      | Uncompressed tree data
+| Offset | Length | Description            |
+|--------|--------|------------------------|
+| 0x00   | 2      | Number of indexes      |
+| 0x02   | 1      | 0x00                   |
+| 0x03   | n      | Uncompressed tree data |
 
 n is an arbitrary size but in total it should match the amount of bits needed to encode all the given indexes.
 
