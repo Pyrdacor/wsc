@@ -61,10 +61,12 @@ public class HuffmanWriter(Dictionary<Word, HuffmanCode> huffmanCodes, BitWriter
         writer.ToNextByteBoundary();
 
         // Sometimes it makes sense to use 0-RLE for the tree. Especially if many indexes are not used.
-        // We can add a header byte which starts with the bit sequence 01..., as no length code can start with a single 0.
-        // So we choose 0x40 but can insert parts of the total header size in there as well.
-        // Thus the header is a word of the form 0x4000 + <compressed tree data size>. The size must not exceed 2^14-1 (16383),
-        // but we can add 1 and allow up to 2^14 (16384). If the size would exceed this, 0-RLE is not allowed.
+        // We add a header byte which starts with the bit 1 if RLE is used and 0 otherwise.
+        // So it is 0 for non-RLE and 0x80+ for RLE. If RLE is used, the first 2 bytes (including the header byte)
+        // are the size of the compressed RLE data.
+        // Thus the header is a word of the form 0x8000 + <compressed tree data size>. The size must therefore
+        // not exceed 2^15-1 (32767). But as a size of 0 makes no sense we treat the given value as size - 1.
+        // So we allow up to 2^15 (32768). If the size would exceed this, 0-RLE is not allowed.
 
         byte[] treeData = [.. buffer.Take(treeWriter.Size)];
         List<byte> rleData = new(treeData.Length - 2);
@@ -99,16 +101,15 @@ public class HuffmanWriter(Dictionary<Word, HuffmanCode> huffmanCodes, BitWriter
 
         PutZeros();
 
-        if (rleData.Count < treeData.Length - 2 - 2 && rleData.Count <= 16384) // 2 for the size header (not part of data) and 2 for the needed rle header
+        if (rleData.Count < treeData.Length - 2 - 2 && rleData.Count <= 32768) // 2 for the size header (not part of data) and 2 for the needed rle header
         {
-            var header = (Word)(0x4000 + rleData.Count - 1);
-            byte[] headerData = [(byte)(header >> 8), (byte)(header & 0xff)];
+            var header = (Word)(0x8000 + rleData.Count - 1);
 
-            writer.WriteBytes([.. treeData.Take(2), .. headerData, .. rleData]);
+            writer.WriteBytes([.. treeData.Take(2), (byte)(header >> 8), (byte)(header & 0xff), .. rleData]);
         }
         else
         {
-            writer.WriteBytes(treeData);
+            writer.WriteBytes([.. treeData.Take(2), 0x00, ..treeData.Skip(2)]);
         }
     }
 }

@@ -56,9 +56,9 @@ public class HuffmanReader(BitReader reader)
         var treeReader = reader;
 
         // 0-RLE used?
-        if ((reader.PeekBits(8) & 0xc0) == 0x40)
+        if ((reader.PeekBits(8) & 0x80) == 0x80)
         {
-            int rleDataSize = 1 + (int)(reader.ReadBits(16) & 0x3fff);
+            int rleDataSize = 1 + (int)(reader.ReadBits(16) & 0x7fff);
             var rleData = reader.ReadBytes(rleDataSize);
             var treeData = new List<byte>();
 
@@ -81,6 +81,11 @@ public class HuffmanReader(BitReader reader)
 
             treeReader = new BitReader([.. treeData]);
         }
+        else
+        {
+            if (reader.ReadBits(8) != 0) // skip and check header
+                throw new Exception("Invalid Huffman tree header encountered!");
+        }
 
         Word index = 0;
 
@@ -93,6 +98,8 @@ public class HuffmanReader(BitReader reader)
             else
                 index++;
         }
+
+        reader.ToNextByteBoundary();
 
         return CreateLookupTable(huffmanCodeLengths);
     }

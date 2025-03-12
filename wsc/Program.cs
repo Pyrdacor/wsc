@@ -9,7 +9,7 @@ public static class Program
     public static void Main()
     {
 #if true
-        var data = File.ReadAllBytes(@"D:\Projects\Ambermoon Advanced\releases\english\ambermoon_advanced_english_1.31_extracted\image.bmp");
+        var data = File.ReadAllBytes(@"D:\Projects\Ambermoon Advanced\releases\english\ambermoon_advanced_english_1.31_extracted\Game.cs");
 
         var compressedData = Compress(data.Length % 2 == 0 ? data : [ ..data, 0 ]);
 
@@ -17,14 +17,14 @@ public static class Program
         {
             Console.WriteLine($"Compressed from {data.Length} to {compressedData.Length}");
 
-            File.WriteAllBytes(@"D:\Projects\Ambermoon Advanced\releases\english\ambermoon_advanced_english_1.31_extracted\image.cmp", compressedData);
+            File.WriteAllBytes(@"D:\Projects\Ambermoon Advanced\releases\english\ambermoon_advanced_english_1.31_extracted\Game.cmp", compressedData);
         }
 #else
-        var data = File.ReadAllBytes(@"D:\Projects\Ambermoon Advanced\releases\english\ambermoon_advanced_english_1.31_extracted\image.cmp");
+        var data = File.ReadAllBytes(@"D:\Projects\Ambermoon Advanced\releases\english\ambermoon_advanced_english_1.31_extracted\Game.cmp");
 
         var unc = Decompress(data);
 
-        File.WriteAllBytes(@"D:\Projects\Ambermoon Advanced\releases\english\ambermoon_advanced_english_1.31_extracted\image.raw", unc);
+        File.WriteAllBytes(@"D:\Projects\Ambermoon Advanced\releases\english\ambermoon_advanced_english_1.31_extracted\Game.raw", unc);
 #endif
     }
 
