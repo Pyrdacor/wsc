@@ -16,7 +16,10 @@ Huffman coding in most cases.
 
 The tricky part is to store the tree, as it might encode way more than 256 symbols and can consume a lot of space.
 
-The compression works pretty good on binary data with repeated word values, uncompressed assemblies, uncompressed bitmaps with low color count and even text data. 
+The compression works pretty good on binary data with repeated word values, uncompressed assemblies, uncompressed bitmaps with low color count and even text data.
+
+The algorithm has some limitations. Most notably the maximum of 22 bits per index encoding. For very large amounts of different words, a compression is not possible.
+Therefore it cannot compress several files including benchmark files like enwik8 etc.
 
 ## Compression
 
