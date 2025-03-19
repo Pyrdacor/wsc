@@ -46,6 +46,8 @@ The bit mask can be used if words and indexes change frequently. In general it i
 
 If a sequence of words exceeds 128, the same header can be used again of course. Same with sequences of indexes which exceed an amount of 64.
 
+The header 0xc0 is the end marker. It marks the end of the compressed data. In general it would mean that it is a bit mask header but as all bits are 0, this would mean that just 6 words follow. But this can be expressed with the first header format so this header is not needed. So never use header 0xc0 to express a word sequence. Always end the compressed data with that header.
+
 Whenever writing an index, it is Huffman encoded. A canonical Huffman tree is used which depends on the frequency an index occurs. For example if the input data contains word 0x1234 only once, the index frequency is zero as it is never used. If another word appears 5 times, the frequency of its index would be 4, as the index only appears 4 times while the word itself appears once.
 
 As the index is associated even if it is not used again, the frequency of 0 might be common. Those indexes are encoded in the Huffman tree as having a length of 0, as they are never used. This is why the symbol length 0 is encoded small when storing the pretree for the main Huffman tree (see Tree encoding below).
