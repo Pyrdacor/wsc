@@ -1,6 +1,7 @@
 ﻿using Word = System.UInt16;
 using Uint = System.UInt32;
 using wsc.Core;
+using System.Diagnostics;
 
 namespace wsc;
 
@@ -15,7 +16,10 @@ public static class Program
 #if true
         var data = File.ReadAllBytes(input);
 
+        var timer = Stopwatch.StartNew();
         var compressedData = Compress(data.Length % 2 == 0 ? data : [ ..data, 0 ]);
+        timer.Stop();
+        Console.WriteLine($"Compression time: {timer.Elapsed}, ratio: {100.0 - compressedData.Length * 100.0 / data.Length:0.00}%");
 
         if (compressedData.Length < data.Length)
         {
