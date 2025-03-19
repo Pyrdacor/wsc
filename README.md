@@ -11,23 +11,57 @@ The compression is quite fast in contrast to algorithms like LZ77 as it has not 
 You could say that the word indexes encode a byte sequence match of length 2. But it does not need any offset or
 length information. The index itself is enough and has always the same size.
 
-As indexes (repeated symboles) are less common as all possible 2^16 symbols, they are ideal to encode them with
+As indexes (repeated symbols) are less common as all possible 2^16 symbols, they are ideal to encode them with
 Huffman coding in most cases.
 
 The tricky part is to store the tree, as it might encode way more than 256 symbols and can consume a lot of space.
 
 
+## Compression
+
+The raw data is interpreted as a sequence of little endian 16-bit values (words). If the raw data size is odd a padding byte with value zero is appended to the data.
+
+If a word value is found for the first time, an auto increased index is assigned which starts at zero. So the first found word gets index 0, the second found word index 1 and so on.
+
+If the same word is encountered again, it is replaced by its index.
+
+In addition a counter is used to track the count of sequential words and sequential indexes.
+
+The compressed output is then generated as a bit stream. To identify words and indexes in the output, header bytes are used. As every compressed data has to start with at least one normal word value, the first header just gives the number of following words. As a byte can express values from 0 to 255 but a count of 0 is impossible, the first header stores the number of words minus 1. So a header value of 5 means that 6 words will follow.
+
+Words are written directly as 16 bits to the output stream. Note that this is basically big endian encoding as the bits are written to the stream from highest to lowest bit. This is true in general for writing data to the bit stream.
+
+After the first word sequence, the next header must be inserted. This and all following headers now have a special format but they are still always 8 bits in size. Dependent on the data a header can take one of three formats:
+
+- If the value is less than 0x80 (128) it again gives a number of words minus 1, so it can encode 1 to 128 words.
+- If the value is less than 0xC0 (192) the lowest 6 bits give a number of indexes minus 1, so it can encode 1 to 64 indexes.
+- Otherwise the lowest 6 bits specify a bit mask where starting from lowest bit, each bit states if a symbol (0) or index (1) follows.
+
+The last two cases can also be interpreted as:
+
+- If the upper two bits are 10, the lowest 6 bits give a number of indexes minus 1.
+- If the upper two bits are 11, the lowest 6 bits specify the bit mask.
+
+The bit mask can be used if words and indexes change frequently. In general it is beneficial if the amount of words and the amount of indexes together is less or equal than 6. For example if you have 5 words, then 1 index and then words again, you can encode the 5 words and the index in one bit mask header. Otherwise it would need two headers.
+
+If a sequence of words exceeds 128, the same header can be used again of course. Same with sequences of indexes which exceed an amount of 64.
+
+Whenever writing an index, it is Huffman encoded. A canonical Huffman tree is used which depends on the frequency an index occurs. For example if the input data contains word 0x1234 only once, the index frequency is zero as it is never used. If another word appears 5 times, the frequency of its index would be 4, as the index only appears 4 times while the word itself appears once.
+
+As the index is associated even if it is not used again, the frequency of 0 might be common. Those indexes are encoded in the Huffman tree as having a length of 0, as they are never used. This is why the symbol length 0 is encoded small when storing the pretree for the main Huffman tree (see Tree encoding below).
+
+
 ## Tree encoding
 
 The Huffman tree is first based on a simple frequency table of all word indexes. Canonical huffman codes are then
-generated from this table.
+generated from this table. If an index is not used at all (frequency = 0), then it is stored with a length of zero in the tree.
 
 Only the length of the indexes are stored. First the total amount of indexes is stored as a 16 bit value. This includes
 all indexes up to the highest which is actually used (= repeated word).
 
 Then the lengths of each index is stored in a bitstream. The lengths are stored in a special way to save space.
 
-There is a static Huffman table for the lengths of the index lengths.
+There is a static Huffman table for the lengths of the index lengths (aka the pretree).
 
 | Length | Bit representation |
 |--------|--------------------|
