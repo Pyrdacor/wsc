@@ -6,10 +6,14 @@ namespace wsc;
 
 public static class Program
 {
-    public static void Main()
+    public static void Main(string[] args)
     {
+        // TODO: usage, options, etc
+        var input = args[0];
+        var output = args[1];
+
 #if true
-        var data = File.ReadAllBytes(@"D:\Projects\Ambermoon Advanced\releases\english\ambermoon_advanced_english_1.31_extracted\Game.cs");
+        var data = File.ReadAllBytes(input);
 
         var compressedData = Compress(data.Length % 2 == 0 ? data : [ ..data, 0 ]);
 
@@ -17,14 +21,14 @@ public static class Program
         {
             Console.WriteLine($"Compressed from {data.Length} to {compressedData.Length}");
 
-            File.WriteAllBytes(@"D:\Projects\Ambermoon Advanced\releases\english\ambermoon_advanced_english_1.31_extracted\Game.cmp", compressedData);
+            File.WriteAllBytes(output, compressedData);
         }
 #else
-        var data = File.ReadAllBytes(@"D:\Projects\Ambermoon Advanced\releases\english\ambermoon_advanced_english_1.31_extracted\Game.cmp");
+        var data = File.ReadAllBytes(input);
 
-        var unc = Decompress(data);
+        var uncompressed = Decompress(data);
 
-        File.WriteAllBytes(@"D:\Projects\Ambermoon Advanced\releases\english\ambermoon_advanced_english_1.31_extracted\Game.raw", unc);
+        File.WriteAllBytes(output, uncompressed);
 #endif
     }
 
