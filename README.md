@@ -99,45 +99,31 @@ From those information a canonical huffman tree is generated in both the encoder
 
 The encoder writes the lengths with this Huffman tree. Non-used indexes have length 0.
 
-As there are often sequences of zeros in the resulting data, as some words are tracked but not repeated,
-the data can be 0-RLE encoded to save space.
+For larger gaps of unused indexes (multiple lenght entries with value 0) there is a special encoding.
 
-In this case if a zero is encountered in the data, a zero is output and the next byte is interpreted as
-a count of zeros to write. All other bytes are written as is. Typically an encoder will try to RLE encode
-and only if the result is smaller than the original data plus needed header, it will write data as encoded.
+Whenever a length of 0 is read, the next bits are checked to determine the amount of following zero lengths.
 
-To specify if the data is RLE encoded there is a header byte which is 0x00 if not encoded and 0x80+ if encoded.
-If encoded the header byte and the following byte together form a 16 bit big endian value where the lower 15 bits
-specify the size of the compressed data minus 1. So it is possible to specify lengths from 1 to 32768 bytes.
+| Bit pattern        | Amount |
+|--------------------|--------|
+| `0`                |      0 |
+| `100..110`         |   1..3 |
+| `1110000..1111111` |  4..19 |
+
+For a single zero length this wastes 1 bit, for 2 zero lengths in a row it is not changing the bit count (as the length zero needs 3 bits to encode).
+For 3 zero lengths in a row, it saves 3 bits. For 4 to 19 zero lengths it saves 5, 8, 11, ..., 50 bits respectively.
+
+This encoding can only express up to 19 zero lengths in a row, but you can repeat this of course.
+So for example a sequence of 76 zero lengths can be expressed by four of such encodings saving
+200 bits in total (28 bits instead of 228 bits).
 
 ### Data format
 
 Note that the whole tree data section always starts at a full byte boundary!
 
-#### RLE encoded data
-
-| Offset | Length | Description                          |
-|--------|--------|--------------------------------------|
-| 0x00   | 2      | Number of indexes                    |
-| 0x02   | 2      | 0x8000 + size of compressed data - 1 |
-| 0x04   | n      | RLE-encoded tree data                |
-
-n is the size of the compressed data. For example if the header is 0x8007, the compressed data size is 0x8007 - 0x8000 + 1 = 8 bytes.
-
-To decompress the tree data just read byte by byte. If the byte is non-zero just write it to the output.
-If it is zero read the next byte, add 1 and write that many zeros to the output.
-
-For example the uncompressed data `0F 00 0A 0B 00 00 00 0C` would be encoded as `0F 00 00 0A 0B 00 02 0C`.
-
-After decompression it has the same format as non-RLE uncompressed tree data (see below).
-
-#### Non-RLE data
-
 | Offset | Length | Description            |
 |--------|--------|------------------------|
 | 0x00   | 2      | Number of indexes      |
-| 0x02   | 1      | 0x00                   |
-| 0x03   | n      | Uncompressed tree data |
+| 0x02   | n      | Tree data              |
 
 n is an arbitrary size but in total it should match the amount of bits needed to encode all the given indexes.
 

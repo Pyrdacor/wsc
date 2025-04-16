@@ -68,7 +68,12 @@ public class HuffmanReader(BitReader reader)
                 var zeroLengthCount = reader.ReadBits(1);
 
                 if (zeroLengthCount != 0)
+                {
                     zeroLengthCount = 1 + reader.ReadBits(2);
+
+                    if (zeroLengthCount == 4)
+                        zeroLengthCount += reader.ReadBits(4);
+                }
 
                 index += (ushort)(1 + zeroLengthCount);
             }

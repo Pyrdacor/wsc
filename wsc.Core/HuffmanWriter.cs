@@ -64,10 +64,11 @@ public class HuffmanWriter(Dictionary<Word, HuffmanCode> huffmanCodes, BitWriter
             {
                 if (lastLength == 0)
                 {
-                    if (++followZeroLengthCount < 5)
+                    if (++followZeroLengthCount < 20)
                         continue;
 
-                    treeWriter.WriteBits(4 + 3, 3);
+                    // We reach 20 zeros and have to break the sequence into two.
+                    treeWriter.WriteBits(0x7f, 7); // 1111111 -> 19 zeros
                     followZeroLengthCount = 0;
                 }
             }
@@ -75,11 +76,19 @@ public class HuffmanWriter(Dictionary<Word, HuffmanCode> huffmanCodes, BitWriter
             {
                 if (followZeroLengthCount == 0)
                 {
+                    // 0 zeros encoded as 0b (1 bit)
                     treeWriter.WriteBits(0, 1);
+                }
+                else if (followZeroLengthCount < 4)
+                {
+                    // 1..3 zeros encoded as 100b..110b (3 bits)
+                    treeWriter.WriteBits((Uint)(0x04 + followZeroLengthCount - 1), 3);
+                    followZeroLengthCount = 0;
                 }
                 else
                 {
-                    treeWriter.WriteBits((Uint)(4 + followZeroLengthCount - 1), 3);
+                    // 4..19 zeros encoded as 1110000b..1111111b (7 bits)
+                    treeWriter.WriteBits((Uint)(0x70 + followZeroLengthCount - 4), 7);
                     followZeroLengthCount = 0;
                 }
             }
