@@ -4,20 +4,13 @@ Maybe use only 6 bits for the literal count header and 7 bits for the alternatin
 
 ## Tree encoding
 
-Instead of storing the length of all indexes, maybe it is better to use a Delta Encoding first. So store the distances from the last inded to the next.
+There might be gaps of zero-length symbols as indexes might not be used (16 bit symbols occur only once inside the data).
 
-This will reduce the amount of symbol lengths to store and will lower the possibility to encounter big length values.
+To address this the length tree has a special encoding.
 
-### Example
+If a length of 0 is read, the next bit is checked. If it is 0, there is no further length of zero. But if the bit is 1, the next 2 bits give the amount of following zeros minus 1.
 
-Used indexes:
+For a single zero length this wastes 1 bit, for 2 zero lengths in a row it is not changing the bit count (as the length zero needs 3 bits to encode).
+For 3, 4 or 5 zero lengths in a row, it saves 3, 6 or 9 bits respectively.
 
-0001 0003 0004 0009 01ff 0200 0203
-
-This needs 516 entries in the length table.
-
-It can be first encoded as:
-
-0001 0002 0001 0005 01f6 0003
-
-This only needs 6 entries and has only 1 bigger value.
+So for larger gaps this can save quite some bits.

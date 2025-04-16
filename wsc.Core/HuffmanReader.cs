@@ -53,50 +53,25 @@ public class HuffmanReader(BitReader reader)
         var lengthCount = (int)reader.ReadBits(16) + 1;
         var treeLookup = CreateLookupTable(LengthCodeLengths.Select((length, i) => new { Symbol = (ushort)i, Length = length }).ToDictionary(x => x.Symbol, x => x.Length));
         var huffmanCodeLengths = new Dictionary<Word, Uint>(lengthCount);
-        var treeReader = reader;
-
-        // 0-RLE used?
-        if ((reader.PeekBits(8) & 0x80) == 0x80)
-        {
-            int rleDataSize = 1 + (int)(reader.ReadBits(16) & 0x7fff);
-            var rleData = reader.ReadBytes(rleDataSize);
-            var treeData = new List<byte>();
-
-            for (int i = 0; i < rleData.Length; i++)
-            {
-                byte b = rleData[i];
-
-                if (b == 0)
-                {
-                    int count = rleData[++i] + 1;
-
-                    for (int j = 0; j < count; j++)
-                        treeData.Add(0);
-                }
-                else
-                {
-                    treeData.Add(b);
-                }
-            }
-
-            treeReader = new BitReader([.. treeData]);
-        }
-        else
-        {
-            if (reader.ReadBits(8) != 0) // skip and check header
-                throw new Exception("Invalid Huffman tree header encountered!");
-        }
 
         Word index = 0;
+        Word maxIndex = (Word)(lengthCount - 1);
 
-        for (int i = 0; i < lengthCount; i++)
+        while (index <= maxIndex)
         {
-            var length = ReadWithTree(treeLookup, treeReader);
+            var length = ReadWithTree(treeLookup, reader);
 
             if (length != 0)
                 huffmanCodeLengths[index++] = length;
             else
-                index++;
+            {
+                var zeroLengthCount = reader.ReadBits(1);
+
+                if (zeroLengthCount != 0)
+                    zeroLengthCount = 1 + reader.ReadBits(2);
+
+                index += (ushort)(1 + zeroLengthCount);
+            }
         }
 
         reader.ToNextByteBoundary();

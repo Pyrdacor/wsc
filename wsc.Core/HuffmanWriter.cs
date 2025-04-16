@@ -51,65 +51,44 @@ public class HuffmanWriter(Dictionary<Word, HuffmanCode> huffmanCodes, BitWriter
         var lengthCodes = HuffmanTree.GenerateCanonicalCodes(LengthCodeLengths.Select((length, i) => new { Symbol = (ushort)i, Length = length }).ToDictionary(x => x.Symbol, x => x.Length));
         var lengthWriter = new HuffmanWriter(lengthCodes, treeWriter);
 
+        // Optimization: If an index is not used it is common that there are more unused indexes following.
+        // Therefore for the length 0 we append a 4 bit value which gives the amount of following zero-length indexes.
+        int followZeroLengthCount = 0;
+        int lastLength = -1;
+
         for (Uint code = 0; code < codeCount; code++)
         {
             int length = huffmanCodes.TryGetValue((Word)code, out var huffmanCode) ? huffmanCode.Length : 0;
 
+            if (length == 0)
+            {
+                if (lastLength == 0)
+                {
+                    if (++followZeroLengthCount < 5)
+                        continue;
+
+                    treeWriter.WriteBits(4 + 3, 3);
+                    followZeroLengthCount = 0;
+                }
+            }
+            else if (lastLength == 0)
+            {
+                if (followZeroLengthCount == 0)
+                {
+                    treeWriter.WriteBits(0, 1);
+                }
+                else
+                {
+                    treeWriter.WriteBits((Uint)(4 + followZeroLengthCount - 1), 3);
+                    followZeroLengthCount = 0;
+                }
+            }
+
             lengthWriter.WriteIndex((ushort)length);
+            lastLength = length;
         }
 
         writer.ToNextByteBoundary();
-
-        // Sometimes it makes sense to use 0-RLE for the tree. Especially if many indexes are not used.
-        // We add a header byte which starts with the bit 1 if RLE is used and 0 otherwise.
-        // So it is 0 for non-RLE and 0x80+ for RLE. If RLE is used, the first 2 bytes (including the header byte)
-        // are the size of the compressed RLE data.
-        // Thus the header is a word of the form 0x8000 + <compressed tree data size>. The size must therefore
-        // not exceed 2^15-1 (32767). But as a size of 0 makes no sense we treat the given value as size - 1.
-        // So we allow up to 2^15 (32768). If the size would exceed this, 0-RLE is not allowed.
-
-        byte[] treeData = [.. buffer.Take(treeWriter.Size)];
-        List<byte> rleData = new(treeData.Length - 2);
-        int zeroCount = 0;
-
-        void PutZeros()
-        {
-            while (zeroCount != 0)
-            {
-                int count = Math.Min(256, zeroCount);
-                rleData.Add(0);
-                rleData.Add((byte)(count - 1));
-
-                zeroCount -= count;
-            }
-        }
-
-        for (int i = 2; i < treeData.Length; i++)
-        {
-            byte b = treeData[i];
-
-            if (b == 0)
-            {
-                ++zeroCount;
-            }
-            else
-            {
-                PutZeros();
-                rleData.Add(b);
-            }
-        }
-
-        PutZeros();
-
-        if (rleData.Count < treeData.Length - 2 - 2 && rleData.Count <= 32768) // 2 for the size header (not part of data) and 2 for the needed rle header
-        {
-            var header = (Word)(0x8000 + rleData.Count - 1);
-
-            writer.WriteBytes([.. treeData.Take(2), (byte)(header >> 8), (byte)(header & 0xff), .. rleData]);
-        }
-        else
-        {
-            writer.WriteBytes([.. treeData.Take(2), 0x00, ..treeData.Skip(2)]);
-        }
+        writer.WriteBytes([.. buffer.Take(treeWriter.Size)]);
     }
 }
