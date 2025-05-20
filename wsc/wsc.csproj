@@ -9,7 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\wsc.Core\wsc.Core.csproj" />
+    <ProjectReference Include="..\WSC.Compression\WSC.Compression.csproj" />
   </ItemGroup>
 
 </Project>

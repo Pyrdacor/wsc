@@ -2,6 +2,13 @@
 
 Maybe use only 6 bits for the literal count header and 7 bits for the alternating header. I guess it is less common to have more than 64 literals in a row than 7 alternating literals and indexes.
 
+Or maybe the first 2 bits give the header type.
+
+00: Literals (1-64)
+01: Indexes (1-64)
+10: Alternating (6 bits)
+11: Alternating (14 bits)
+
 ## Tree encoding
 
 There might be gaps of zero-length symbols as indexes might not be used (16 bit symbols occur only once inside the data).

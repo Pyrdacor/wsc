@@ -1,0 +1,32 @@
+for:
+-
+    branches:
+        only:
+            - master
+            - /v\d+\.\d+\.\d+/
+
+    image:
+        - Visual Studio 2022
+
+platform: Any CPU
+configuration: Release
+
+build:
+  parallel: true
+  project: WSC.Compression/WSC.Compression.csproj
+
+artifacts:
+  - path: nuget\*.nupkg
+    name: NugetPackages
+
+after_build:
+    - ps: ./nuget.ps1
+
+test: false
+
+deploy:
+  - provider: NuGet
+    name: NugetPackages
+    api_key:
+      secure: 7ujvk64dx5v/uIaRbaWM8wkxhxbqCQ2o6rrPctfu0nMamIKAezf+TPzRY81cBNFT
+    skip_symbols: true

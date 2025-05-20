@@ -1,4 +1,4 @@
-﻿namespace wsc.Core;
+﻿namespace WSC.Core;
 
 public class BitWriter(byte[] data)
 {

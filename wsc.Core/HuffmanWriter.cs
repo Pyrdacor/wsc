@@ -1,4 +1,4 @@
-﻿namespace wsc.Core;
+﻿namespace WSC.Core;
 
 public class HuffmanWriter(Dictionary<Word, HuffmanCode> huffmanCodes, BitWriter writer)
 {

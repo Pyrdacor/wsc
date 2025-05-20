@@ -1,0 +1,30 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <Title>WSC Compression</Title>
+    <Authors>Robert Schneckenhaus</Authors>
+    <Description>Very fast word sequence compression.</Description>
+    <PackageProjectUrl>https://github.com/Pyrdacor/wsc</PackageProjectUrl>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <RepositoryUrl>https://github.com/Pyrdacor/wsc</RepositoryUrl>
+    <RepositoryType>github</RepositoryType>
+    <PackageTags>Compression</PackageTags>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\wsc.Core\WSC.Core.csproj" />
+  </ItemGroup>
+
+</Project>
