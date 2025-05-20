@@ -11,9 +11,8 @@ for:
 platform: Any CPU
 configuration: Release
 
-build:
-  parallel: true
-  project: WSC.Compression/WSC.Compression.csproj
+build_script:
+  - dotnet build WSC.Compression/WSC.Compression.csproj
 
 artifacts:
   - path: nuget\*.nupkg
