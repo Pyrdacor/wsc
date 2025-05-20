@@ -1,4 +1,4 @@
-﻿namespace WSC.Compression;
+﻿namespace PYC.Compression;
 
 using Core;
 using Word = System.UInt16;

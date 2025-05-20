@@ -1,6 +1,6 @@
-# WSC
+# PYC
 
-WSC stands for Word Sequence Compression. It is a simple compression method that interprets the input as a
+PYC is a word sequence compression. It is a simple compression method that interprets the input as a
 sequence of words and compresses it by replacing repeated words by its index of first occurence.
 
 Those indexes are then compressed by a dynamic canonical Huffman tree which allows code length up to 22 bits.

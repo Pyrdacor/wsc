@@ -1,4 +1,4 @@
-﻿namespace WSC.Core;
+﻿namespace PYC.Core;
 
 public class HuffmanWriter(Dictionary<Word, HuffmanCode> huffmanCodes, BitWriter writer)
 {

@@ -1,7 +1,7 @@
-﻿using WSC.Compression;
+﻿using PYC.Compression;
 using System.Diagnostics;
 
-namespace WSC;
+namespace PYC;
 
 public static class Program
 {

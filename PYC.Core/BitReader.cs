@@ -1,4 +1,4 @@
-﻿namespace WSC.Core;
+﻿namespace PYC.Core;
 
 public class BitReader(byte[] data)
 {

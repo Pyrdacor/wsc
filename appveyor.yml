@@ -3,7 +3,7 @@ platform: Any CPU
 configuration: Release
 
 build_script:
-  - dotnet build WSC.Compression/WSC.Compression.csproj
+  - dotnet build PYC.Compression/PYC.Compression.csproj
 
 artifacts:
   - path: nuget\*.nupkg

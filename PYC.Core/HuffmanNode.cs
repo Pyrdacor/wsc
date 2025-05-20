@@ -1,4 +1,4 @@
-﻿namespace WSC.Core;
+﻿namespace PYC.Core;
 
 public class HuffmanNode(int symbol, Uint frequency)
 {
