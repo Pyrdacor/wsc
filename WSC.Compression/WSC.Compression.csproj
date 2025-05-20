@@ -24,7 +24,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\wsc.Core\WSC.Core.csproj" />
+    <ProjectReference Include="..\WSC.Core\WSC.Core.csproj" />
   </ItemGroup>
 
 </Project>
