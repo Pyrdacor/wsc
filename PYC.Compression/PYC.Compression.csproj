@@ -14,6 +14,9 @@
     <RepositoryUrl>https://github.com/Pyrdacor/PYC</RepositoryUrl>
     <RepositoryType>github</RepositoryType>
     <PackageTags>Compression</PackageTags>
+	<IncludeReferencedProjects>true</IncludeReferencedProjects>
+	<AssemblyVersion>1.0.0.1</AssemblyVersion>
+	<FileVersion>1.0.0.1</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>
